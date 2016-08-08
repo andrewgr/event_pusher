@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+#require_relative "../lib/event_pusher"
+module EventPusher
+  class Application
+    def initialize(args)
+      @args = args
+    end
+
+    def run
+      puts (@args.empty? ? "kokokoko" : @args)
+    end
+  end
+end
+
+begin
+  EventPusher::Application.new(ARGV).run
+rescue Errno::ENOENT => err
+  abort "rcat: #{err.message}"
+#rescue OptionParser::InvalidOption => err
+  #abort "rcat: #{err.message}\nusage: rcat [-bns] [file ...]"
+end
