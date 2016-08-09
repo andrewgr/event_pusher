@@ -1,14 +1,33 @@
 #!/usr/bin/env ruby
 
+require 'net/http'
+require 'json'
+
 #require_relative "../lib/event_pusher"
 module EventPusher
   class Application
+    attr_reader :uri, :payload
+
     def initialize(args)
-      @args = args
+      @uri = URI('http://localhost:2300/events')
+
+      @payload = {
+        "name"    => "Event",
+        "actor"   => "actor_token",
+        "version" => "1.0",
+        "data"    => { "key" => "value" }
+      }.to_json
     end
 
     def run
-      puts (@args.empty? ? "kokokoko" : @args)
+      req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
+      req.body = payload
+      response = Net::HTTP.start(uri.hostname, uri.port){ |http| http.request(req) }
+
+      puts "Response #{response.code} #{response.message}: #{response.body}"
+
+    rescue StandardError => err
+      abort "EventPusher: #{err.message}"
     end
   end
 end
@@ -16,7 +35,7 @@ end
 begin
   EventPusher::Application.new(ARGV).run
 rescue Errno::ENOENT => err
-  abort "rcat: #{err.message}"
+  abort "EventPusher: #{err.message}"
 #rescue OptionParser::InvalidOption => err
   #abort "rcat: #{err.message}\nusage: rcat [-bns] [file ...]"
 end
